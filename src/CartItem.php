@@ -5,7 +5,6 @@ namespace Gloudemans\Shoppingcart;
 use Gloudemans\Shoppingcart\Contracts\Buyable;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
-use Illuminate\Support\Arr;
 
 class CartItem implements Arrayable, Jsonable
 {
@@ -78,6 +77,13 @@ class CartItem implements Arrayable, Jsonable
      * @var float
      */
     private $discountRate = 0;
+
+    /**
+     * The cost for the cart item.
+     *
+     * @var int|float
+     */
+    private $cost = 0;
 
     /**
      * CartItem constructor.
@@ -253,6 +259,48 @@ class CartItem implements Arrayable, Jsonable
     }
 
     /**
+     * Returns the formatted cost.
+     *
+     * @param int    $decimals
+     * @param string $decimalPoint
+     * @param string $thousandSeperator
+     *
+     * @return string
+     */
+    public function cost($decimals = null, $decimalPoint = null, $thousandSeperator = null)
+    {
+        return $this->numberFormat($this->cost, $decimals, $decimalPoint, $thousandSeperator);
+    }
+
+    /**
+     * Returns the formatted cost.
+     *
+     * @param int    $decimals
+     * @param string $decimalPoint
+     * @param string $thousandSeperator
+     *
+     * @return string
+     */
+    public function costTotal($decimals = null, $decimalPoint = null, $thousandSeperator = null)
+    {
+        return $this->numberFormat($this->costTotal, $decimals, $decimalPoint, $thousandSeperator);
+    }
+
+    /**
+     * Returns the formatted cost.
+     *
+     * @param int    $decimals
+     * @param string $decimalPoint
+     * @param string $thousandSeperator
+     *
+     * @return string
+     */
+    public function grandTotal($decimals = null, $decimalPoint = null, $thousandSeperator = null)
+    {
+        return $this->numberFormat($this->grandTotal, $decimals, $decimalPoint, $thousandSeperator);
+    }
+
+    /**
      * Set the quantity for this cart item.
      *
      * @param int|float $qty
@@ -290,13 +338,13 @@ class CartItem implements Arrayable, Jsonable
      */
     public function updateFromArray(array $attributes)
     {
-        $this->id = Arr::get($attributes, 'id', $this->id);
-        $this->qty = Arr::get($attributes, 'qty', $this->qty);
-        $this->name = Arr::get($attributes, 'name', $this->name);
-        $this->price = Arr::get($attributes, 'price', $this->price);
-        $this->weight = Arr::get($attributes, 'weight', $this->weight);
+        $this->id = array_get($attributes, 'id', $this->id);
+        $this->qty = array_get($attributes, 'qty', $this->qty);
+        $this->name = array_get($attributes, 'name', $this->name);
+        $this->price = array_get($attributes, 'price', $this->price);
+        $this->weight = array_get($attributes, 'weight', $this->weight);
         $this->priceTax = $this->price + $this->tax;
-        $this->options = new CartItemOptions(Arr::get($attributes, 'options', $this->options));
+        $this->options = new CartItemOptions(array_get($attributes, 'options', $this->options));
 
         $this->rowId = $this->generateRowId($this->id, $this->options->all());
     }
@@ -368,13 +416,19 @@ class CartItem implements Arrayable, Jsonable
             case 'priceTax':
                 return $this->priceTarget + $this->tax;
             case 'total':
-                return $this->priceTax * $this->qty;
+                return $this->priceTax * $this->qty ;
             case 'taxTotal':
                 return $this->tax * $this->qty;
             case 'discountTotal':
                 return $this->discount * $this->qty;
             case 'weightTotal':
                 return $this->weight * $this->qty;
+            case 'cost':
+                return $this->cost;
+            case 'costTotal':
+                return ceil($this->weightTotal/1000) * $this->cost;
+            case 'grandTotal':
+                return $this->total + $this->costTotal;
 
             case 'model':
                 if (isset($this->associatedModel)) {
@@ -413,7 +467,7 @@ class CartItem implements Arrayable, Jsonable
      */
     public static function fromArray(array $attributes)
     {
-        $options = Arr::get($attributes, 'options', []);
+        $options = array_get($attributes, 'options', []);
 
         return new self($attributes['id'], $attributes['name'], $attributes['price'], $attributes['weight'], $options);
     }
@@ -465,6 +519,7 @@ class CartItem implements Arrayable, Jsonable
             'options'  => $this->options->toArray(),
             'discount' => $this->discount,
             'tax'      => $this->tax,
+            'cost'     => $this->cost,
             'subtotal' => $this->subtotal,
         ];
     }
@@ -506,5 +561,19 @@ class CartItem implements Arrayable, Jsonable
         }
 
         return number_format($value, $decimals, $decimalPoint, $thousandSeperator);
+    }
+
+    /**
+     * Set the cost.
+     *
+     * @param int|float $cost
+     *
+     * @return \Gloudemans\Shoppingcart\CartItem
+     */
+    public function setCostRate($cost)
+    {
+        $this->cost = $cost;
+
+        return $this;
     }
 }
