@@ -671,6 +671,10 @@ class Cart
                 return $this->tax();
             case 'subtotal':
                 return $this->subtotal();
+            case 'cost':
+                return $this->cost();
+            case 'grandtotal':
+                return $this->grandtotal();
             default:
                 return;
         }
@@ -803,4 +807,79 @@ class Cart
 
         return number_format($value, $decimals, $decimalPoint, $thousandSeperator);
     }
+
+    /**
+     * Set the cost for the cart item with the given rowId.
+     *
+     * @param string    $rowId
+     * @param int|float $taxRate
+     *
+     * @return void
+     */
+    public function setCost($rowId, $cost)
+    {
+        $cartItem = $this->get($rowId);
+
+        $cartItem->setCostRate($cost);
+
+        $content = $this->getContent();
+
+        $content->put($cartItem->rowId, $cartItem);
+
+        $this->session->put($this->instance, $content);
+    }
+
+    /**
+     * Get the total cost of the items in the cart.
+     *
+     * @return float
+     */
+    public function costFloat()
+    {
+        return $this->getContent()->reduce(function ($cost, CartItem $cartItem) {
+            return $cost + $cartItem->costTotal;
+        }, 0);
+    }
+
+    /**
+     * Get the total shipping cost of the items in the cart as formatted string.
+     *
+     * @param int    $decimals
+     * @param string $decimalPoint
+     * @param string $thousandSeperator
+     *
+     * @return string
+     */
+    public function cost($decimals = null, $decimalPoint = null, $thousandSeperator = null)
+    {
+        return $this->numberFormat($this->costFloat(), $decimals, $decimalPoint, $thousandSeperator);
+    }
+
+    /**
+     * Get the total cost of the items in the cart.
+     *
+     * @return float
+     */
+    public function grandFloat()
+    {
+        return $this->getContent()->reduce(function ($grandFloat, CartItem $cartItem) {
+            return $grandFloat + $cartItem->grandTotal;
+        }, 0);
+    }
+
+    /**
+     * Returns the formatted cost.
+     *
+     * @param int    $decimals
+     * @param string $decimalPoint
+     * @param string $thousandSeperator
+     *
+     * @return string
+     */
+    public function grandtotal($decimals = null, $decimalPoint = null, $thousandSeperator = null)
+    {
+        return $this->numberFormat($this->grandFloat(), $decimals, $decimalPoint, $thousandSeperator);
+    }
+
+    
 }
