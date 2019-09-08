@@ -7,7 +7,10 @@
 [![Latest Unstable Version](https://poser.pugx.org/bumbummen99/shoppingcart/v/unstable)](https://packagist.org/packages/bumbummen99/shoppingcart)
 [![License](https://poser.pugx.org/bumbummen99/shoppingcart/license)](https://packagist.org/packages/bumbummen99/shoppingcart)
 
-This is a fork of [Crisane's LaravelShoppingcart](https://github.com/Crinsane/LaravelShoppingcart) extended with minor features compatible with Laravel 6.
+This package is based on [bumbummen99/LaravelShoppingcart](https://github.com/bumbummen99/LaravelShoppingcart)
+>##### Differences with bumbummen99/LaravelShoppingcart version:
+>- Add extra cost in cart (Service/Shipping/Other cost).
+
 
 ## Installation
 
@@ -15,7 +18,7 @@ Install the [package](https://packagist.org/packages/bumbummen99/shoppingcart) t
 
 Run the Composer require command from the Terminal:
 
-    composer require bumbummen99/shoppingcart
+    composer require gusindra/shoppingcart
 
 Now you're ready to start using the shoppingcart in your application.
 
