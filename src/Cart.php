@@ -53,6 +53,13 @@ class Cart
     private $taxRate = 0;
 
     /**
+     * Defines the cost value.
+     *
+     * @var float
+     */
+    private $cost = 0;
+
+    /**
      * Cart constructor.
      *
      * @param \Illuminate\Session\SessionManager      $session
@@ -827,6 +834,24 @@ class Cart
         $content->put($cartItem->rowId, $cartItem);
 
         $this->session->put($this->instance, $content);
+    }
+
+    /**
+     * Set the cost rate for the cart.
+     * This will set the tax rate for all items.
+     *
+     * @param float $cost
+     */
+    public function setGlobalCost($cost)
+    {
+        $this->cost = $cost;
+
+        $content = $this->getContent();
+        if ($content && $content->count()) {
+            $content->each(function ($item, $key) {
+                $item->setCostRate($this->cost);
+            });
+        }
     }
 
     /**
