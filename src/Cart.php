@@ -844,9 +844,9 @@ class Cart
      */
     public function setGlobalCost($cost)
     {
-        $this->cost = $cost;
-
         $content = $this->getContent();
+        $this->cost = $cost;
+        
         if ($content && $content->count()) {
             $content->each(function ($item, $key) {
                 $item->setCostRate($this->cost);
